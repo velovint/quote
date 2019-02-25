@@ -4,6 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 @Component
 public class UsersCommandLineRunner implements CommandLineRunner {
@@ -15,7 +16,10 @@ public class UsersCommandLineRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        userRepository.insert(new TradingUser("Dow", "Jones"))
-                .block(Duration.ofSeconds(1));
+        userRepository
+                .insert(Arrays.asList(
+                    new TradingUser("jhoeller", "Juergen Hoeller"),
+                    new TradingUser("wilkinsona", "Andy Wilkinson")))
+                .blockLast(Duration.ofSeconds(1));
     }
 }

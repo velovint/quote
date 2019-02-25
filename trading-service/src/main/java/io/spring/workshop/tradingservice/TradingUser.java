@@ -54,18 +54,20 @@ public class TradingUser {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        if (!super.equals(object)) return false;
-        TradingUser that = (TradingUser) object;
-        return java.util.Objects.equals(id, that.id) &&
-                java.util.Objects.equals(userName, that.userName) &&
-                java.util.Objects.equals(fullName, that.fullName);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TradingUser that = (TradingUser) o;
+
+        if (!id.equals(that.id)) return false;
+        return userName.equals(that.userName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), id, userName, fullName);
+        int result = id.hashCode();
+        result = 31 * result + userName.hashCode();
+        return result;
     }
 }
