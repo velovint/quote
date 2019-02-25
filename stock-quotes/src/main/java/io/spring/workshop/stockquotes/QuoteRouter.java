@@ -18,6 +18,9 @@ public class QuoteRouter {
                                 .and(accept(MediaType.TEXT_PLAIN))
                                 .and(contentType(MediaType.TEXT_PLAIN)),
                         quoteHandler::echo)
-                .andRoute(GET("/quotes"), quoteHandler::streamQuotes);
+                .andRoute(
+                        GET("/quotes").and(accept(MediaType.APPLICATION_STREAM_JSON)),
+                        quoteHandler::streamQuotes)
+                .andRoute(GET("/quotes"), quoteHandler::getQuotes);
     }
 }

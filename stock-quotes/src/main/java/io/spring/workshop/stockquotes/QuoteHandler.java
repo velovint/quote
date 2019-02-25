@@ -31,6 +31,13 @@ public class QuoteHandler {
                 .body(request.bodyToMono(String.class), String.class);
     }
 
+    public Mono<ServerResponse>  getQuotes(ServerRequest request) {
+        Integer num = request.queryParam("size").map(Integer::valueOf)
+                .orElse(10);
+        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
+                .body(quoteStream.take(num), Quote.class);
+    }
+
     public Mono<ServerResponse> streamQuotes(ServerRequest request) {
         return ServerResponse.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(quoteStream, Quote.class);
     }
