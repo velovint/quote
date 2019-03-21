@@ -33,6 +33,16 @@ public class LoggingTest {
                 .block();
     }
 
+    @Test
+    public void loggingWithLogOnNext() {
+        SignalLogger signalLogger = new SignalLogger(log);
+
+        Mono.just("something")
+                .doOnEach(signalLogger.info("Test signal logger with context ->{}<-"))
+                .subscriberContext(Context.of("dataKey", "data"))
+                .block();
+    }
+
     private static <T> Consumer<Signal<T>> logOnNext(Consumer<T> logStatement) {
         return signal -> {
             if (!signal.isOnNext()) return;
@@ -45,5 +55,23 @@ public class LoggingTest {
                 logStatement.accept(signal.get());
             }
         };
+    }
+
+    private static class SignalLogger {
+
+        private Logger log;
+
+        public SignalLogger(Logger log) {
+            this.log = log;
+        }
+
+        public Consumer<Signal<?>> info(String message) {
+            return signal -> {
+
+                if (!signal.isOnNext()) return;
+                String contextData = signal.getContext().getOrDefault("dataKey", "");
+                log.info(message, contextData);
+            };
+        }
     }
 }
