@@ -47,18 +47,17 @@ public class LoggingTest {
                 .block();
     }
 
-    private static <T> Consumer<Signal<T>> logOnNext(Consumer<T> logStatement) {
-        return signal -> {
-            if (!signal.isOnNext()) return;
-            Optional<String> apiIDMaybe = signal.getContext().getOrEmpty("apiID");
-            if (apiIDMaybe.isPresent()) {
-                try (MDC.MDCCloseable closeable = MDC.putCloseable("apiID", apiIDMaybe.get())) {
-                    logStatement.accept(signal.get());
-                }
-            } else {
-                logStatement.accept(signal.get());
-            }
-        };
+    @Test
+    public void loggingWithMonoSubscriberContext() {
+        Mono.just("something")
+                .zipWith(Mono.subscriberContext())
+                .doOnSuccess(dataWithContext -> {
+                    log.info("Finished processing of {} with context {}",
+                            dataWithContext.getT1(),
+                            StructuredArguments.entries(contextToMap(dataWithContext.getT2())));
+                })
+                .subscriberContext(Context.of("dataKey", "data"))
+                .block();
     }
 
     private static class SignalLogger {
@@ -73,10 +72,14 @@ public class LoggingTest {
             return signal -> {
 
                 if (!signal.isOnNext()) return;
-                final Map<Object, Object> context = signal.getContext().stream()
-                        .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                final Map<Object, Object> context = contextToMap(signal.getContext());
                 log.info(message, StructuredArguments.entries(context));
             };
         }
+    }
+
+    private static Map<Object, Object> contextToMap(Context context) {
+        return context.stream()
+                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
     }
 }
