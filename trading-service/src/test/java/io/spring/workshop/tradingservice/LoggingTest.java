@@ -1,5 +1,7 @@
 package io.spring.workshop.tradingservice;
 
+import net.logstash.logback.argument.StructuredArguments;
+import net.logstash.logback.marker.Markers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -11,8 +13,10 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Signal;
 import reactor.util.context.Context;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,7 +38,7 @@ public class LoggingTest {
     }
 
     @Test
-    public void loggingWithLogOnNext() {
+    public void loggingWithSignalLogger() {
         SignalLogger signalLogger = new SignalLogger(log);
 
         Mono.just("something")
@@ -69,8 +73,9 @@ public class LoggingTest {
             return signal -> {
 
                 if (!signal.isOnNext()) return;
-                String contextData = signal.getContext().getOrDefault("dataKey", "");
-                log.info(message, contextData);
+                final Map<Object, Object> context = signal.getContext().stream()
+                        .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                log.info(message, StructuredArguments.entries(context));
             };
         }
     }
